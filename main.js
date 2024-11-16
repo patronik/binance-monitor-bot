@@ -6,9 +6,9 @@ import fs from 'fs';
 const config = {
   apiKey: process.env.BINANCE_API_KEY, // Replace with your Binance API key
   apiSecret: process.env.BINANCE_API_SECRET, // Replace with your Binance API secret
-  symbol: 'BTCUSDT', // Pair to monitor
-  monitoringDuration: 60000 * 15, // Monitoring time in milliseconds (default: 15 minutes)
-  interval: 5 * 60 * 1000, // Time frame interval in milliseconds (default: 5 minutes)
+  symbol: process.env.SYMBOL, // Pair to monitor
+  monitoringDuration: 60000 * process.env.TOTAL_DURATION, // Monitoring time in milliseconds (default: 15 minutes)
+  interval: process.env.FRAME_INTERVAL * 60 * 1000, // Time frame interval in milliseconds (default: 5 minutes)
 };
 
 const binance = new Binance().options({
@@ -29,7 +29,7 @@ const monitorPrices = async () => {
       const timestamp = new Date();
 
       priceData.push({ timestamp, price });
-      console.log(`[${timestamp.toISOString()}] Price: $${price}`);
+      console.log(".");
     } catch (error) {
       console.error('Error fetching price:', error);
     }
@@ -57,15 +57,23 @@ const analyzePrices = () => {
   
     let totalMinPrices = 0; // Sum of all min prices
     let totalMaxPrices = 0; // Sum of all max prices
-    let intervalCount = 0; // Count of intervals for averaging
-  
-    for (let i = 0; i < priceData.length; i++) {
+    let intervalCount = 0; // Count of intervals for averaging   
+      
+    for (let i = 0; i < priceData.length;) {
       const frameStart = new Date(startTime.getTime() + Math.floor(i / (config.interval / 1000)) * config.interval);
       const frameEnd = new Date(frameStart.getTime() + config.interval);
-  
-      const framePrices = priceData.filter(
-        (data) => data.timestamp >= frameStart && data.timestamp < frameEnd
-      );
+        
+      const framePrices = [];
+      while (
+        priceData[i] !== undefined 
+        && (
+            priceData[i].timestamp >= frameStart 
+            && priceData[i].timestamp <= frameEnd
+          )
+      ) {
+        framePrices.push(priceData[i]);
+        i++;
+      }
   
       if (framePrices.length > 0) {
         const minPrice = Math.min(...framePrices.map((p) => p.price));
@@ -100,6 +108,7 @@ const analyzePrices = () => {
     console.log('\nOverall Averages:');
     console.log(`Average Min Price: $${avgMinPrice.toFixed(2)}`);
     console.log(`Average Max Price: $${avgMaxPrice.toFixed(2)}`);
+    console.log(`Average Price Diff: $${avgMaxPrice.toFixed(2) - avgMinPrice.toFixed(2)}`);
   
     // Save results to file (optional)
     fs.writeFileSync('price_analysis.json', JSON.stringify(minMaxData, null, 2));
