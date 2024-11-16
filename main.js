@@ -18,6 +18,10 @@ const binance = new Binance().options({
 
 let priceData = []; // To store prices with timestamps
 
+const isDebug = () => {
+  return process.env.DEBUG == 'true';
+};
+
 // Monitor prices
 const monitorPrices = async () => {
   console.log(`Monitoring ${config.symbol} prices for ${config.monitoringDuration / 1000 / 60} minutes...`);
@@ -27,9 +31,7 @@ const monitorPrices = async () => {
       const ticker = await binance.prices(config.symbol);
       const price = parseFloat(ticker[config.symbol]);
       const timestamp = new Date();
-
       priceData.push({ timestamp, price });
-      console.log(".");
     } catch (error) {
       console.error('Error fetching price:', error);
     }
@@ -58,20 +60,38 @@ const analyzePrices = () => {
     let totalMinPrices = 0; // Sum of all min prices
     let totalMaxPrices = 0; // Sum of all max prices
     let intervalCount = 0; // Count of intervals for averaging   
-      
+    let totalFrames = Math.floor(priceData.length / (config.interval / 1000)); // Count of frames 
+
+    if (isDebug()) {
+      console.log('Collected items: ', JSON.stringify(priceData, null, 4));
+      console.log("Total items: %d", priceData.length);
+      console.log("Total frame indexes: %d", totalFrames);  
+    }
+    
     for (let i = 0; i < priceData.length;) {
-      const frameStart = new Date(startTime.getTime() + Math.floor(i / (config.interval / 1000)) * config.interval);
+      if (isDebug()) {
+        console.log("Current item index: %d", i); 
+      }
+      const currentFrame = Math.floor(i / (config.interval / 1000));
+      if (isDebug()) {
+        console.log("Current frame index: %d", currentFrame);
+      }
+
+      const frameStart = new Date(startTime.getTime() + currentFrame * config.interval);
       const frameEnd = new Date(frameStart.getTime() + config.interval);
         
       const framePrices = [];
       while (
-        priceData[i] !== undefined 
+        i < priceData.length 
         && (
             priceData[i].timestamp >= frameStart 
             && priceData[i].timestamp <= frameEnd
           )
       ) {
         framePrices.push(priceData[i]);
+        if (isDebug()) {
+          console.log("Last collected item index: %d", i);
+        }
         i++;
       }
   
@@ -85,6 +105,23 @@ const analyzePrices = () => {
           minPrice,
           maxPrice,
         });
+
+        if (isDebug()) {
+          console.log(
+            "Frame %d data", 
+            currentFrame, 
+            JSON.stringify(
+              {
+                frameStart: frameStart.toISOString(),
+                frameEnd: frameEnd.toISOString(),
+                minPrice,
+                maxPrice,
+              }, 
+              null, 
+              4
+            )
+          );
+        }
   
         // Accumulate min and max prices for average calculation
         totalMinPrices += minPrice;
@@ -108,7 +145,7 @@ const analyzePrices = () => {
     console.log('\nOverall Averages:');
     console.log(`Average Min Price: $${avgMinPrice.toFixed(2)}`);
     console.log(`Average Max Price: $${avgMaxPrice.toFixed(2)}`);
-    console.log(`Average Price Diff: $${avgMaxPrice.toFixed(2) - avgMinPrice.toFixed(2)}`);
+    console.log(`Average Price Diff: $${(avgMaxPrice.toFixed(2) - avgMinPrice.toFixed(2)).toFixed(2)}`);
   
     // Save results to file (optional)
     fs.writeFileSync('price_analysis.json', JSON.stringify(minMaxData, null, 2));
