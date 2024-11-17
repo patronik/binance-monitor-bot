@@ -61,6 +61,7 @@ const analyzePrices = () => {
     let totalMaxPrices = 0; // Sum of all max prices
     let intervalCount = 0; // Count of intervals for averaging   
     let totalFrames = Math.floor(priceData.length / (config.interval / 1000)); // Count of frames 
+    let skippedCount = 0;
 
     if (isDebug()) {
       console.log('Collected items: ', JSON.stringify(priceData, null, 4));
@@ -79,37 +80,40 @@ const analyzePrices = () => {
 
       const frameStart = new Date(startTime.getTime() + currentFrame * config.interval);
       const frameEnd = new Date(frameStart.getTime() + config.interval);
-
-      if (
-          (currentFrame == 0 && priceData[i].timestamp < frameStart) // Timestamp lower than first frame start time
-          || (currentFrame == totalFrames && priceData[i].timestamp > frameEnd) // Timestamp bigger than last frame end time
-      ) {
-        if (isDebug()) {
-          console.log("Skipping item: %d", i);
-          console.log("Current frame: %d", currentFrame);
-          console.log("Frame start: %d", frameStart);
-          console.log("Frame end: %d", frameEnd);
-          console.log("Item: %s", JSON.stringify(priceData[i], null, 4));
-        }
-        i++; // skip item
-        continue;
-      }
-        
       const framePrices = [];
-      while (
-        i < priceData.length 
-        && (
-            priceData[i].timestamp >= frameStart 
-            && priceData[i].timestamp <= frameEnd
-          )
-      ) {
-        framePrices.push(priceData[i]);
-        if (isDebug()) {
-          console.log("Last collected item index: %d", i);
-        }
-        i++;
+
+      if (priceData[i] !== undefined) {
+        if (
+          (priceData[i].timestamp < frameStart) // Timestamp lower than first frame start time
+          || (priceData[i].timestamp > frameEnd) // Timestamp bigger than last frame end time
+        ) {
+          if (isDebug()) {
+            console.log("Skipping item: %d", i);
+            console.log("Current frame: %d", currentFrame);
+            console.log("Frame start: %d", frameStart);
+            console.log("Frame end: %d", frameEnd);
+            console.log("Item: %s", JSON.stringify(priceData[i], null, 4));
+          }
+          i++; // skip item
+          skippedCount++;
+          continue;
+        } else {
+          while (
+            i < priceData.length 
+            && (
+                priceData[i].timestamp >= frameStart 
+                && priceData[i].timestamp <= frameEnd
+              )
+          ) {
+            framePrices.push(priceData[i]);
+            if (isDebug()) {
+              console.log("Last collected item index: %d", i);
+            }
+            i++;
+          }  
+        }  
       }
-  
+      
       if (framePrices.length > 0) {
         const minPrice = Math.min(...framePrices.map((p) => p.price));
         const maxPrice = Math.max(...framePrices.map((p) => p.price));
@@ -156,15 +160,16 @@ const analyzePrices = () => {
         `Time Frame: ${data.frameStart} to ${data.frameEnd} | Min Price: $${data.minPrice} | Max Price: $${data.maxPrice}`
       );
     });
-  
+
     console.log('\nOverall Averages:');
     console.log(`Average Min Price: $${avgMinPrice.toFixed(2)}`);
     console.log(`Average Max Price: $${avgMaxPrice.toFixed(2)}`);
     console.log(`Average Price Diff: $${(avgMaxPrice.toFixed(2) - avgMinPrice.toFixed(2)).toFixed(2)}`);
+    console.log(`Skipped Count: ${skippedCount}`);
   
     // Save results to file (optional)
-    fs.writeFileSync('price_analysis.json', JSON.stringify(minMaxData, null, 2));
-    console.log('Results saved to price_analysis.json');
+    // fs.writeFileSync('price_analysis.json', JSON.stringify(minMaxData, null, 2));
+    // console.log('Results saved to price_analysis.json');
   };
 
 // Start the bot
