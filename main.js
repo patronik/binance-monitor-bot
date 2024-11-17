@@ -59,6 +59,7 @@ const analyzePrices = () => {
   
     let totalMinPrices = 0; // Sum of all min prices
     let totalMaxPrices = 0; // Sum of all max prices
+    let totalAvgPrices = 0; // Sum of all avg prices
     let intervalCount = 0; // Count of intervals for averaging   
     let totalFrames = Math.floor(priceData.length / (config.interval / 1000)); // Count of frames 
     let skippedCount = 0;
@@ -115,14 +116,17 @@ const analyzePrices = () => {
       }
       
       if (framePrices.length > 0) {
-        const minPrice = Math.min(...framePrices.map((p) => p.price));
-        const maxPrice = Math.max(...framePrices.map((p) => p.price));
+        const framePrices = framePrices.map((p) => p.price);
+        const minPrice = Math.min(...framePrices);
+        const maxPrice = Math.max(...framePrices);
+        const avgPrice = framePrices.reduce((a, b) => a + b, 0) / framePrices.length;
   
         minMaxData.push({
           frameStart: frameStart.toISOString(),
           frameEnd: frameEnd.toISOString(),
           minPrice,
           maxPrice,
+          avgPrice,
         });
 
         if (isDebug()) {
@@ -135,6 +139,7 @@ const analyzePrices = () => {
                 frameEnd: frameEnd.toISOString(),
                 minPrice,
                 maxPrice,
+                avgPrice,
               }, 
               null, 
               4
@@ -145,6 +150,7 @@ const analyzePrices = () => {
         // Accumulate min and max prices for average calculation
         totalMinPrices += minPrice;
         totalMaxPrices += maxPrice;
+        totalAvgPrices += avgPrice;
         intervalCount++;
       }
     }
@@ -152,24 +158,28 @@ const analyzePrices = () => {
     // Calculate average min and max prices
     const avgMinPrice = totalMinPrices / intervalCount;
     const avgMaxPrice = totalMaxPrices / intervalCount;
+    const avgAvgPrice = totalAvgPrices / intervalCount; 
+    const averagePriceDiff = avgMaxPrice.toFixed(2) - avgMinPrice.toFixed(2);
+    const averageVolatility = (averagePriceDiff / avgAvgPrice).toFixed(2) * 100;
   
     // Log results
     console.log('Price analysis complete. Results:');
+    console.log(`Skipped Count: ${skippedCount}`);
     minMaxData.forEach((data) => {
       console.log(
-        `Time Frame: ${data.frameStart} to ${data.frameEnd} | Min Price: $${data.minPrice} | Max Price: $${data.maxPrice}`
+        `Time Frame: ${data.frameStart} to ${data.frameEnd} 
+        | Min Price: $${data.minPrice} 
+        | Max Price: $${data.maxPrice} 
+        | Avg Price: $${data.avgPrice}`
       );
     });
 
     console.log('\nOverall Averages:');
     console.log(`Average Min Price: $${avgMinPrice.toFixed(2)}`);
     console.log(`Average Max Price: $${avgMaxPrice.toFixed(2)}`);
-    console.log(`Average Price Diff: $${(avgMaxPrice.toFixed(2) - avgMinPrice.toFixed(2)).toFixed(2)}`);
-    console.log(`Skipped Count: ${skippedCount}`);
-  
-    // Save results to file (optional)
-    // fs.writeFileSync('price_analysis.json', JSON.stringify(minMaxData, null, 2));
-    // console.log('Results saved to price_analysis.json');
+    console.log(`Average Avg Price: $${avgAvgPrice.toFixed(2)}`);
+    console.log(`Average Price Diff: $${averagePriceDiff.toFixed(2)}`);
+    console.log(`Average Volatility: ${averageVolatility.toFixed(2)}%`);  
   };
 
 // Start the bot
