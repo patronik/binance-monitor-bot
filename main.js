@@ -79,6 +79,21 @@ const analyzePrices = () => {
 
       const frameStart = new Date(startTime.getTime() + currentFrame * config.interval);
       const frameEnd = new Date(frameStart.getTime() + config.interval);
+
+      if (
+          (currentFrame == 0 && priceData[i].timestamp < frameStart) // Timestamp lower than first frame start time
+          || (currentFrame == totalFrames && priceData[i].timestamp > frameEnd) // Timestamp bigger than last frame end time
+      ) {
+        if (isDebug()) {
+          console.log("Skipping item: %d", i);
+          console.log("Current frame: %d", currentFrame);
+          console.log("Frame start: %d", frameStart);
+          console.log("Frame end: %d", frameEnd);
+          console.log("Item: %s", JSON.stringify(priceData[i], null, 4));
+        }
+        i++; // skip item
+        continue;
+      }
         
       const framePrices = [];
       while (
@@ -127,10 +142,6 @@ const analyzePrices = () => {
         totalMinPrices += minPrice;
         totalMaxPrices += maxPrice;
         intervalCount++;
-      }
-
-      if (currentFrame == totalFrames) {
-        break;
       }
     }
   
