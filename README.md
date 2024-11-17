@@ -9,6 +9,7 @@ This is a Node.js script that monitors BTC prices using the Binance API, analyze
 - Calculates minimum and maximum prices for 5-minute intervals.
 - Calculates overall average minimum and maximum prices.
 - Logs analysis results to the console and saves them to a JSON file.
+- Notifies with collected results by email.
 
 ## Prerequisites
 
@@ -37,20 +38,28 @@ git clone <repository_url>
 cd <repository_directory>
 ```
 
-If you have a local copy, create a directory and move the script:
-```bash
-mkdir ~/binance-bot
-cd ~/binance-bot
-```
-
 ### 4. Install Dependencies
 ```bash
 npm init -y
 npm install node-binance-api
 ```
 
-### 5. Configure the Script
-Edit `bot.js` to include your Binance API key and secret:
+### 5. Configure the Environment
+Create a `.env` file in the project directory and add the following configuration:
+
+```plaintext
+BINANCE_API_KEY=YOUR_KEY                # Your Binance API key
+BINANCE_API_SECRET=YOUR_SECRET          # Your Binance API secret
+TOTAL_DURATION=15                       # Total monitoring duration in minutes
+FRAME_INTERVAL=5                        # Frame interval duration in minutes
+SYMBOL=BTCUSDT                          # Cryptocurrency pair to monitor
+DEBUG=true                              # Enable or disable debug logs
+CONTACT_EMAIL_ADDRESS=homepage.admin@gmail.com # Email address for notifications (if implemented)
+CONTACT_EMAIL_PASSWORD='password'       # Email password for notifications (if implemented)
+```
+
+### 6. Configure main script
+Edit `main.js` to include your Binance API key and secret:
 ```javascript
 const config = {
   apiKey: '<YOUR_API_KEY>',
@@ -58,16 +67,28 @@ const config = {
 };
 ```
 
-### 6. Run the Script
-```bash
-node bot.js
+### 7. Configure mailer script
+Edit `mailer.js` to include your gmail SMTP credentials:
+```javascript
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+      user: '<YOUR_CONTACT_EMAIL_ADDRESS>', 
+      pass: '<YOUR_CONTACT_EMAIL_PASSWORD'   
+  }
+  });
 ```
 
-### 7. Run in Background (Optional)
+### 8. Run the Script
+```bash
+node main.js
+```
+
+### 9. Run in Background (Optional)
 Install `pm2` for background execution:
 ```bash
 sudo npm install -g pm2
-pm2 start bot.js --name "binance-bot"
+pm2 start main.js --name "binance-bot"
 pm2 save
 pm2 startup
 ```
