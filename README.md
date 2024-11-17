@@ -54,6 +54,7 @@ TOTAL_DURATION=15                       # Total monitoring duration in minutes
 FRAME_INTERVAL=5                        # Frame interval duration in minutes
 SYMBOL=BTCUSDT                          # Cryptocurrency pair to monitor
 DEBUG=true                              # Enable or disable debug logs
+LOCALE='en-US'                          # Locale used for date and time output
 CONTACT_EMAIL_ADDRESS=homepage.admin@gmail.com # Email address for notifications (if implemented)
 CONTACT_EMAIL_PASSWORD='password'       # Email password for notifications (if implemented)
 ```

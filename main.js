@@ -33,7 +33,7 @@ const isDebug = () => {
 const monitorPrices = async () => {
   const monitoringStartTime = new Date(); // Capture monitoring start time
   console.log(`Monitoring ${config.symbol} prices for ${config.monitoringDuration / 1000 / 60} minutes...`);
-  console.log(`Monitoring started at: ${monitoringStartTime.toLocaleTimeString('uk-UA')}`);
+  console.log(`Monitoring started at: ${monitoringStartTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))}`);
 
   const priceHandler = async () => {
     try {
@@ -52,7 +52,7 @@ const monitorPrices = async () => {
     clearInterval(intervalId);
     const monitoringEndTime = new Date(); // Capture monitoring end time
     console.log('Monitoring complete.');
-    console.log(`Monitoring ended at: ${monitoringEndTime.toLocaleTimeString('uk-UA')}`);
+    console.log(`Monitoring ended at: ${monitoringEndTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))}`);
     console.log(`Total monitoring duration: ${((monitoringEndTime - monitoringStartTime) / 1000).toFixed(2)} seconds.`);
     let {
       avgMinPrice, 
@@ -150,8 +150,8 @@ const analyzePrices = () => {
       const avgPrice = framePrices.reduce((a, b) => a + b, 0) / framePrices.length;
 
       minMaxData.push({
-        frameStart: frameStart.toLocaleTimeString('uk-UA'),
-        frameEnd: frameEnd.toLocaleTimeString('uk-UA'),
+        frameStart: frameStart.toLocaleTimeString((process.env.LOCALE || 'en-US')),
+        frameEnd: frameEnd.toLocaleTimeString((process.env.LOCALE || 'en-US')),
         minPrice,
         maxPrice,
         avgPrice,
@@ -163,8 +163,8 @@ const analyzePrices = () => {
           currentFrame, 
           JSON.stringify(
             {
-              frameStart: frameStart.toLocaleTimeString('uk-UA'),
-              frameEnd: frameEnd.toLocaleTimeString('uk-UA'),
+              frameStart: frameStart.toLocaleTimeString((process.env.LOCALE || 'en-US')),
+              frameEnd: frameEnd.toLocaleTimeString((process.env.LOCALE || 'en-US')),
               minPrice,
               maxPrice,
               avgPrice,

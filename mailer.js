@@ -31,7 +31,7 @@ const sendEmail = (
             from: `Binance monitor <${process.env.CONTACT_EMAIL_ADDRESS}>`, 
             to: process.env.CONTACT_EMAIL_ADDRESS, 
             subject: `Binance monitor: Avg Volatility: ${avgVolatility.toFixed(2)}%. Duration: ${((endTime - startTime) / 1000 / 60).toFixed(2)} minutes. Interval: ${(process.env.FRAME_INTERVAL || 5)} minutes.`,
-            text: `Monitoring for symbol ${process.env.SYMBOL} started at ${startTime.toLocaleTimeString('uk-UA')} and completed at ${endTime.toLocaleTimeString('uk-UA')} with the following results:          
+            text: `Monitoring for symbol ${process.env.SYMBOL} started at ${startTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} and completed at ${endTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} with the following results:          
 Avg PriceDiff: ${avgPriceDiff.toFixed(2)}%.
 Avg MinPrice: ${avgMinPrice.toFixed(2)}%.
 Avg MaxPrice: ${avgMaxPrice.toFixed(2)}%.
