@@ -81,7 +81,7 @@ const analyzePrices = () => {
 
       const frameStart = new Date(startTime.getTime() + currentFrame * config.interval);
       const frameEnd = new Date(frameStart.getTime() + config.interval);
-      const framePrices = [];
+      const framePriceItems = [];
 
       if (priceData[i] !== undefined) {
         if (
@@ -106,7 +106,7 @@ const analyzePrices = () => {
                 && priceData[i].timestamp <= frameEnd
               )
           ) {
-            framePrices.push(priceData[i]);
+            framePriceItems.push(priceData[i]);
             if (isDebug()) {
               console.log("Last collected item index: %d", i);
             }
@@ -115,8 +115,8 @@ const analyzePrices = () => {
         }  
       }
       
-      if (framePrices.length > 0) {
-        const framePrices = framePrices.map((p) => p.price);
+      if (framePriceItems.length > 0) {
+        const framePrices = framePriceItems.map((p) => p.price);
         const minPrice = Math.min(...framePrices);
         const maxPrice = Math.max(...framePrices);
         const avgPrice = framePrices.reduce((a, b) => a + b, 0) / framePrices.length;
@@ -160,17 +160,14 @@ const analyzePrices = () => {
     const avgMaxPrice = totalMaxPrices / intervalCount;
     const avgAvgPrice = totalAvgPrices / intervalCount; 
     const averagePriceDiff = avgMaxPrice.toFixed(2) - avgMinPrice.toFixed(2);
-    const averageVolatility = (averagePriceDiff / avgAvgPrice).toFixed(2) * 100;
+    const averageVolatility = (averagePriceDiff / avgAvgPrice * 100);
   
     // Log results
     console.log('Price analysis complete. Results:');
     console.log(`Skipped Count: ${skippedCount}`);
     minMaxData.forEach((data) => {
       console.log(
-        `Time Frame: ${data.frameStart} to ${data.frameEnd} 
-        | Min Price: $${data.minPrice} 
-        | Max Price: $${data.maxPrice} 
-        | Avg Price: $${data.avgPrice}`
+        `Time Frame: ${data.frameStart} to ${data.frameEnd} | Min Price: $${data.minPrice} | Max Price: $${data.maxPrice} | Avg Price: $${data.avgPrice}`
       );
     });
 
