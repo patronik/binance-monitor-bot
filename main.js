@@ -128,6 +128,10 @@ const analyzePrices = () => {
         totalMaxPrices += maxPrice;
         intervalCount++;
       }
+
+      if (currentFrame == totalFrames) {
+        break;
+      }
     }
   
     // Calculate average min and max prices
