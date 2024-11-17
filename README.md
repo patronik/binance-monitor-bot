@@ -85,19 +85,9 @@ const transporter = nodemailer.createTransport({
 node main.js
 ```
 
-### 9. Run in Background (Optional)
-Install `pm2` for background execution:
-```bash
-sudo npm install -g pm2
-pm2 start main.js --name "binance-bot"
-pm2 save
-pm2 startup
-```
-
 ## Output
 - Real-time price logs in the console.
 - Analysis results including min, max, and average prices in the console.
-- Results saved to `price_analysis.json`.
 
 ## Configuration
 Modify the `config` object in the script to change:
@@ -107,7 +97,6 @@ Modify the `config` object in the script to change:
 ## Troubleshooting
 - Ensure Node.js and npm are installed (`node -v`, `npm -v`).
 - Verify API credentials for Binance.
-- Use `pm2 logs binance-bot` to debug background issues.
 
 ## License
 This project is licensed under the MIT License.
