@@ -54,6 +54,15 @@ const monitorPrices = async () => {
     console.log('Monitoring complete.');
     console.log(`Monitoring ended at: ${monitoringEndTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))}`);
     console.log(`Total monitoring duration: ${((monitoringEndTime - monitoringStartTime) / 1000).toFixed(2)} seconds.`);
+
+    let openingPrice = priceData[0].price;
+    let closingPrice = priceData[priceData.length - 1].price;
+    console.log('Opening price: %s', openingPrice.toFixed(2));
+    console.log('Closing price: %s', closingPrice.toFixed(2));
+    
+    let priceDiff = (closingPrice - openingPrice);
+    let priceChange = Math.abs(priceDiff) / openingPrice;
+    console.log('Change: %s%s\%', (closingPrice > openingPrice ? '+' : '-'), priceChange.toFixed(4));
   
     let {
       avgMinPrice, 
@@ -62,9 +71,6 @@ const monitorPrices = async () => {
       avgPriceDiff, 
       avgVolatility,
     } = analyzePrices();  
-    
-    let priceDiff = (priceData[priceData.length - 1].price - priceData[0].price);
-    let priceChange = Math.abs(priceDiff) / priceData[0].price;
 
     // Send results by email
     sendEmail(
