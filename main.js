@@ -9,13 +9,21 @@ if (
     throw new Error('Binance API configuration is missing.');
 }
 
+// Read command-line arguments
+const args = process.argv.slice(2);
+const durationArg = args.find((arg) => arg.startsWith('--duration='));
+const intervalArg = args.find((arg) => arg.startsWith('--interval='));
+
+const duration = durationArg ? parseInt(durationArg.split('=')[1], 10) * 60 * 1000 : 15 * 60 * 1000; // Default: 15 minutes
+const interval = intervalArg ? parseInt(intervalArg.split('=')[1], 10) * 60 * 1000 : 5 * 60 * 1000; // Default: 5 minutes
+
 // Configuration
 const config = {
   apiKey: process.env.BINANCE_API_KEY, // Replace with your Binance API key
   apiSecret: process.env.BINANCE_API_SECRET, // Replace with your Binance API secret
   symbol: process.env.SYMBOL || 'BTCUSDT', // Pair to monitor
-  monitoringDuration: 60000 * (process.env.TOTAL_DURATION || 15), // Monitoring time in milliseconds (default: 15 minutes)
-  interval: (process.env.FRAME_INTERVAL || 5) * 60 * 1000, // Time frame interval in milliseconds (default: 5 minutes)
+  monitoringDuration: duration,
+  interval: interval
 };
 
 const binance = new Binance().options({
@@ -51,18 +59,18 @@ const monitorPrices = async () => {
   setTimeout(() => {
     clearInterval(intervalId);
     const monitoringEndTime = new Date(); // Capture monitoring end time
-    console.log('Monitoring complete.');
+    console.log('\nMonitoring complete.');
     console.log(`Monitoring ended at: ${monitoringEndTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))}`);
-    console.log(`Total monitoring duration: ${((monitoringEndTime - monitoringStartTime) / 1000).toFixed(2)} seconds.`);
+    console.log(`Total monitoring duration: ${Math.round((monitoringEndTime - monitoringStartTime) / 1000 / 60)} mins.`);
 
     let openingPrice = priceData[0].price;
     let closingPrice = priceData[priceData.length - 1].price;
-    console.log('Opening price: %s', openingPrice.toFixed(2));
+    console.log('\nOpening price: %s', openingPrice.toFixed(2));
     console.log('Closing price: %s', closingPrice.toFixed(2));
     
     let priceDiff = (closingPrice - openingPrice);
     let priceChange = Math.abs(priceDiff) / openingPrice;
-    console.log('Change: %s%s\%', (closingPrice > openingPrice ? '+' : '-'), priceChange.toFixed(4));
+    console.log('Change: %s%s\%\n', (closingPrice > openingPrice ? '+' : '-'), priceChange.toFixed(4));
   
     let {
       avgMinPrice, 
@@ -72,19 +80,43 @@ const monitorPrices = async () => {
       avgVolatility,
     } = analyzePrices();  
 
-    // Send results by email
-    sendEmail(
-      monitoringStartTime, 
-      monitoringEndTime, 
-      priceData[0].price,
-      priceData[priceData.length - 1].price,
-      priceChange,
-      avgMinPrice, 
-      avgMaxPrice, 
-      avgAvgPrice, 
-      avgPriceDiff, 
-      avgVolatility
-    );
+    let notifyByEmail = true;
+    
+    // Check notification price change treshold 
+    const notifyCngThdArg = args.find((arg) => arg.startsWith('--notifyCngThd='));
+    if (notifyCngThdArg) {
+      let notifyCngThd = parseFloat(notifyCngThdArg.split('=')[1]);
+      if (priceChange < notifyCngThd) {
+        notifyByEmail = false;
+      }
+    }
+    
+    // Check notification price volatility treshold 
+    const notifyVolThdArg = args.find((arg) => arg.startsWith('--notifyVolThd='));
+    if (notifyVolThdArg) {
+      let notifyVolThd = parseFloat(notifyVolThd.split('=')[1]);
+      if (avgVolatility < notifyVolThd) {
+        notifyByEmail = false;
+      }
+    }
+    
+    if (notifyByEmail) {
+      // Send results by email
+      sendEmail(
+        monitoringStartTime, 
+        monitoringEndTime, 
+        openingPrice,
+        closingPrice,
+        priceChange,
+        avgMinPrice, 
+        avgMaxPrice, 
+        avgAvgPrice, 
+        avgPriceDiff, 
+        avgVolatility,
+        duration,
+        interval
+      );  
+    }    
   }, config.monitoringDuration);
 };
 
@@ -206,10 +238,9 @@ const analyzePrices = () => {
 
   // Log results
   console.log('Price analysis complete. Results:');
-  console.log(`Skipped Count: ${skippedCount}`);
   minMaxData.forEach((data) => {
     console.log(
-      `Time Frame: ${data.frameStart} to ${data.frameEnd} | Min Price: $${data.minPrice} | Max Price: $${data.maxPrice} | Avg Price: $${data.avgPrice}`
+      `Time Frame: ${data.frameStart} to ${data.frameEnd} | Min Price: $${data.minPrice.toFixed(2)} | Max Price: $${data.maxPrice.toFixed(2)} | Avg Price: $${data.avgPrice.toFixed(2)}`
     );
   });
 
@@ -219,6 +250,8 @@ const analyzePrices = () => {
   console.log(`Average Avg Price: $${avgAvgPrice.toFixed(2)}`);
   console.log(`Average Price Diff: $${avgPriceDiff.toFixed(2)}`);
   console.log(`Average Volatility: ${avgVolatility.toFixed(2)}%`);  
+
+  console.log(`\nSkipped Count: ${skippedCount}`);
 
   return {
     avgMinPrice, 

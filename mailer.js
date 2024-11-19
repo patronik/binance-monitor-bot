@@ -27,7 +27,9 @@ const sendEmail = (
     avgMaxPrice, 
     avgAvgPrice, 
     avgPriceDiff, 
-    avgVolatility
+    avgVolatility,
+    duration,
+    interval
   ) => {
         let changeSign;
         if (closingPrice > openingPrice) {
@@ -39,7 +41,7 @@ const sendEmail = (
         const mailOptions = {
             from: `Binance monitor <${process.env.CONTACT_EMAIL_ADDRESS}>`, 
             to: process.env.CONTACT_EMAIL_ADDRESS, 
-            subject: `Change: ${changeSign}${priceChange.toFixed(4)}%. Avg Vol.: ${avgVolatility.toFixed(2)}%. Dur.: ${parseInt((endTime - startTime) / 1000 / 60)} mins. Int.: ${parseInt(process.env.FRAME_INTERVAL || 5)} mins.`,
+            subject: `Change: ${changeSign}${priceChange.toFixed(4)}%. Avg Vol.: ${avgVolatility.toFixed(2)}%. Dur.: ${(duration / 60 / 1000)} mins. Int.: ${(interval / 60 / 1000)} mins.`,
             text: `Monitoring for symbol ${process.env.SYMBOL} started at ${startTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} and completed at ${endTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} with the following results:          
 Opening Price: $${openingPrice.toFixed(2)}.
 -----------------------------------------
@@ -55,7 +57,7 @@ Closing Price: $${closingPrice.toFixed(2)}.`
             if (error) {
                 console.error("Email sending error:", error);              
             } else {
-              console.log("Email sent:", info.response);            
+              console.log("Email sent.");            
             }                    
         });
   };

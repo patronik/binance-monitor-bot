@@ -50,8 +50,6 @@ Create a `.env` file in the project directory and add the following configuratio
 ```plaintext
 BINANCE_API_KEY=YOUR_KEY                # Your Binance API key
 BINANCE_API_SECRET=YOUR_SECRET          # Your Binance API secret
-TOTAL_DURATION=15                       # Total monitoring duration in minutes
-FRAME_INTERVAL=5                        # Frame interval duration in minutes
 SYMBOL=BTCUSDT                          # Cryptocurrency pair to monitor
 DEBUG=true                              # Enable or disable debug logs
 LOCALE='en-US'                          # Locale used for date and time output
