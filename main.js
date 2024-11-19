@@ -37,88 +37,6 @@ const isDebug = () => {
   return process.env.DEBUG == 'true';
 };
 
-// Monitor prices
-const monitorPrices = async () => {
-  const monitoringStartTime = new Date(); // Capture monitoring start time
-  console.log(`Monitoring ${config.symbol} prices for ${config.monitoringDuration / 1000 / 60} minutes...`);
-  console.log(`Monitoring started at: ${monitoringStartTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))}`);
-
-  const priceHandler = async () => {
-    try {
-      const ticker = await binance.prices(config.symbol);
-      const price = parseFloat(ticker[config.symbol]);
-      const timestamp = new Date();
-      priceData.push({ timestamp, price });
-    } catch (error) {
-      console.error('Error fetching price:', error);
-    }
-  };
-
-  const intervalId = setInterval(priceHandler, 1000); // Fetch prices every second
-
-  setTimeout(() => {
-    clearInterval(intervalId);
-    const monitoringEndTime = new Date(); // Capture monitoring end time
-    console.log('\nMonitoring complete.');
-    console.log(`Monitoring ended at: ${monitoringEndTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))}`);
-    console.log(`Total monitoring duration: ${Math.round((monitoringEndTime - monitoringStartTime) / 1000 / 60)} mins.`);
-
-    let openingPrice = priceData[0].price;
-    let closingPrice = priceData[priceData.length - 1].price;
-    console.log('\nOpening price: %s', openingPrice.toFixed(2));
-    console.log('Closing price: %s', closingPrice.toFixed(2));
-    
-    let priceDiff = (closingPrice - openingPrice);
-    let priceChange = Math.abs(priceDiff) / openingPrice;
-    console.log('Change: %s%s\%\n', (closingPrice > openingPrice ? '+' : '-'), priceChange.toFixed(4));
-  
-    let {
-      avgMinPrice, 
-      avgMaxPrice, 
-      avgAvgPrice, 
-      avgPriceDiff, 
-      avgVolatility,
-    } = analyzePrices();  
-
-    let notifyByEmail = true;
-    
-    // Check notification price change treshold 
-    const notifyCngThdArg = args.find((arg) => arg.startsWith('--notifyCngThd='));
-    if (notifyCngThdArg) {
-      let notifyCngThd = parseFloat(notifyCngThdArg.split('=')[1]);
-      if (priceChange < notifyCngThd) {
-        notifyByEmail = false;
-      }
-    }
-    
-    // Check notification price volatility treshold 
-    const notifyVolThdArg = args.find((arg) => arg.startsWith('--notifyVolThd='));
-    if (notifyVolThdArg) {
-      let notifyVolThd = parseFloat(notifyVolThd.split('=')[1]);
-      if (avgVolatility < notifyVolThd) {
-        notifyByEmail = false;
-      }
-    }
-    
-    if (notifyByEmail) {
-      // Send results by email
-      sendEmail(
-        monitoringStartTime, 
-        monitoringEndTime, 
-        openingPrice,
-        closingPrice,
-        priceChange,
-        avgMinPrice, 
-        avgMaxPrice, 
-        avgAvgPrice, 
-        avgPriceDiff, 
-        avgVolatility,
-        duration,
-        interval
-      );  
-    }    
-  }, config.monitoringDuration);
-};
 
 // Analyze prices
 const analyzePrices = () => {
@@ -260,6 +178,103 @@ const analyzePrices = () => {
     avgPriceDiff, 
     avgVolatility,
   };
+};
+
+// Monitor prices
+const monitorPrices = async () => {
+  const monitoringStartTime = new Date(); // Capture monitoring start time
+  console.log(`Monitoring ${config.symbol} prices for ${config.monitoringDuration / 1000 / 60} minutes...`);
+  console.log(`Monitoring started at: ${monitoringStartTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))}`);
+
+  const priceHandler = async () => {
+    try {
+      const ticker = await binance.prices(config.symbol);
+      const price = parseFloat(ticker[config.symbol]);
+      const timestamp = new Date();
+      priceData.push({ timestamp, price });
+    } catch (error) {
+      console.error('Error fetching price:', error);
+    }
+  };
+
+  const intervalId = setInterval(priceHandler, 1000); // Fetch prices every second
+
+  setTimeout(() => {
+    clearInterval(intervalId);
+    const monitoringEndTime = new Date(); // Capture monitoring end time
+    console.log('\nMonitoring complete.');
+    console.log(`Monitoring ended at: ${monitoringEndTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))}`);
+    console.log(`Total monitoring duration: ${Math.round((monitoringEndTime - monitoringStartTime) / 1000 / 60)} mins.`);
+
+    let openingPrice = priceData[0].price;
+    let closingPrice = priceData[priceData.length - 1].price;
+    console.log('\nOpening price: %s', openingPrice.toFixed(2));
+    console.log('Closing price: %s', closingPrice.toFixed(2));
+    
+    let priceDiff = (closingPrice - openingPrice);
+    let priceChange = Math.abs(priceDiff) / openingPrice;
+    console.log('Change: %s%s\%\n', (closingPrice > openingPrice ? '+' : '-'), priceChange.toFixed(4));
+  
+    let {
+      avgMinPrice, 
+      avgMaxPrice, 
+      avgAvgPrice, 
+      avgPriceDiff, 
+      avgVolatility,
+    } = analyzePrices();  
+
+    let notifyByEmail = true;
+    
+    // Check notification price change treshold 
+    const notifyCngThdArg = args.find((arg) => arg.startsWith('--notifyCngThd='));
+    if (notifyCngThdArg) {
+      let notifyCngThd = parseFloat(notifyCngThdArg.split('=')[1]);
+      if (priceChange < notifyCngThd) {
+        notifyByEmail = false;
+      }
+    }
+    
+    // Check notification price volatility treshold 
+    const notifyVolThdArg = args.find((arg) => arg.startsWith('--notifyVolThd='));
+    if (notifyVolThdArg) {
+      let notifyVolThd = parseFloat(notifyVolThd.split('=')[1]);
+      if (avgVolatility < notifyVolThd) {
+        notifyByEmail = false;
+      }
+    }
+
+    // Check notification price change up flag 
+    if (args.find((arg) => arg.startsWith('--notifyCngUp='))) {
+      if (!(openingPrice < closingPrice)) {
+        notifyByEmail = false;
+      }
+    }
+
+    // Check notification price change down flag 
+    if (args.find((arg) => arg.startsWith('--notifyCngDown='))) {
+      if (!(openingPrice > closingPrice)) {
+        notifyByEmail = false;
+      }
+    }
+    
+    if (notifyByEmail) {
+      // Send results by email
+      sendEmail(
+        monitoringStartTime, 
+        monitoringEndTime, 
+        openingPrice,
+        closingPrice,
+        priceChange,
+        avgMinPrice, 
+        avgMaxPrice, 
+        avgAvgPrice, 
+        avgPriceDiff, 
+        avgVolatility,
+        duration,
+        interval
+      );  
+    }    
+  }, config.monitoringDuration);
 };
 
 // Start the bot
