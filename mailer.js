@@ -41,7 +41,7 @@ const sendEmail = (
         const mailOptions = {
             from: `Binance monitor <${process.env.CONTACT_EMAIL_ADDRESS}>`, 
             to: process.env.CONTACT_EMAIL_ADDRESS, 
-            subject: `Change: ${changeSign}${priceChange.toFixed(4)}%. Avg Vol.: ${avgVolatility.toFixed(2)}%. Dur.: ${(duration / 60 / 1000)} mins. Int.: ${(interval / 60 / 1000)} mins.`,
+            subject: `Change: ${changeSign}${priceChange.toFixed(2)}%. Avg Vol.: ${avgVolatility.toFixed(2)}%. Dur.: ${(duration / 60 / 1000)} mins. Int.: ${(interval / 60 / 1000)} mins.`,
             text: `Monitoring for symbol ${process.env.SYMBOL} started at ${startTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} and completed at ${endTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} with the following results:          
 Opening Price: $${openingPrice.toFixed(2)}.
 -----------------------------------------

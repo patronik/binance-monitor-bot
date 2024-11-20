@@ -212,8 +212,8 @@ const monitorPrices = async () => {
     console.log('Closing price: %s', closingPrice.toFixed(2));
     
     let priceDiff = (closingPrice - openingPrice);
-    let priceChange = Math.abs(priceDiff) / openingPrice;
-    console.log('Change: %s%s\%\n', (closingPrice > openingPrice ? '+' : '-'), priceChange.toFixed(4));
+    let priceChange = Math.abs(priceDiff) / openingPrice * 100;
+    console.log('Change: %s%s\%\n', (closingPrice > openingPrice ? '+' : '-'), priceChange.toFixed(2));
   
     let {
       avgMinPrice, 
