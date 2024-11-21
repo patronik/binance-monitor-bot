@@ -16,6 +16,7 @@ if (!symbolArg) {
   throw new Error('Cryptocurrency pair to monitor is missing.');
 }
 
+const symbol = symbolArg.split('=')[1];
 const durationArg = args.find((arg) => arg.startsWith('--duration='));
 const intervalArg = args.find((arg) => arg.startsWith('--interval='));
 
@@ -26,7 +27,7 @@ const interval = intervalArg ? parseInt(intervalArg.split('=')[1], 10) * 60 * 10
 const config = {
   apiKey: process.env.BINANCE_API_KEY, // Replace with your Binance API key
   apiSecret: process.env.BINANCE_API_SECRET, // Replace with your Binance API secret
-  symbol: symbolArg.split('=')[1] || 'BTCUSDT', // Pair to monitor
+  symbol: symbol, // Pair to monitor
   monitoringDuration: duration,
   interval: interval
 };
