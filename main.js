@@ -266,6 +266,7 @@ const monitorPrices = async () => {
     if (notifyByEmail) {
       // Send results by email
       sendEmail(
+        symbol,
         monitoringStartTime, 
         monitoringEndTime, 
         openingPrice,
