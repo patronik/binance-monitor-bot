@@ -50,7 +50,6 @@ Create a `.env` file in the project directory and add the following configuratio
 ```plaintext
 BINANCE_API_KEY=YOUR_KEY                # Your Binance API key
 BINANCE_API_SECRET=YOUR_SECRET          # Your Binance API secret
-SYMBOL=BTCUSDT                          # Cryptocurrency pair to monitor
 DEBUG=true                              # Enable or disable debug logs
 LOCALE='en-US'                          # Locale used for date and time output
 CONTACT_EMAIL_ADDRESS=homepage.admin@gmail.com # Email address for notifications (if implemented)
@@ -80,7 +79,7 @@ const transporter = nodemailer.createTransport({
 
 ### 8. Run the Script
 ```bash
-node main.js
+node main.js --symbol=<PAIR TO MONITOR>
 ```
 
 ## Output
