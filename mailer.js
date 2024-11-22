@@ -1,8 +1,8 @@
 import nodemailer from 'nodemailer';
 
 if (
-    process.env.CONTACT_EMAIL_ADDRESS == undefined || 
-    process.env.CONTACT_EMAIL_PASSWORD == undefined
+    process.env.SENDER_EMAIL_ADDRESS == undefined || 
+    process.env.SENDER_EMAIL_PASSWORD == undefined
   ) {
       throw new Error('Email configuration is missing.');
   }
@@ -11,8 +11,8 @@ if (
   const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-      user: process.env.CONTACT_EMAIL_ADDRESS, 
-      pass: process.env.CONTACT_EMAIL_PASSWORD    
+      user: process.env.SENDER_EMAIL_ADDRESS, 
+      pass: process.env.SENDER_EMAIL_PASSWORD    
   }
   });
 
@@ -40,10 +40,10 @@ const sendEmail = (
         }
         // Mail options
         const mailOptions = {
-            from: `Binance monitor <${process.env.CONTACT_EMAIL_ADDRESS}>`, 
-            to: process.env.CONTACT_EMAIL_ADDRESS, 
-            subject: `Cng: ${changeSign}${priceChange.toFixed(2)}%. Avg Vol.: ${avgVolatility.toFixed(2)}%. Dur.: ${(duration / 60 / 1000)} mins. Int.: ${(interval / 60 / 1000)} mins.`,
-            text: `Monitoring for symbol ${symbol} started at ${startTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} and completed at ${endTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} with the following results:          
+            from: `Binance monitor <${process.env.SENDER_EMAIL_ADDRESS}>`, 
+            to: process.env.RECEIVER_EMAIL_ADDRESS, 
+            subject: `${symbol} C: ${changeSign}${priceChange.toFixed(2)}%. AV: ${avgVolatility.toFixed(2)}%. D/I: ${(duration / 60 / 1000)}/${(interval / 60 / 1000)} m.`,
+            text: `Monitoring started at ${startTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} and completed at ${endTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))} with the following results:          
 Opening Price: $${openingPrice.toFixed(2)}.
 -----------------------------------------
 Frame Avg MinPrice: $${avgMinPrice.toFixed(2)}.

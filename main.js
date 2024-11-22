@@ -25,9 +25,9 @@ const interval = intervalArg ? parseInt(intervalArg.split('=')[1], 10) * 60 * 10
 
 // Configuration
 const config = {
-  apiKey: process.env.BINANCE_API_KEY, // Replace with your Binance API key
-  apiSecret: process.env.BINANCE_API_SECRET, // Replace with your Binance API secret
-  symbol: symbol, // Pair to monitor
+  apiKey: process.env.BINANCE_API_KEY, 
+  apiSecret: process.env.BINANCE_API_SECRET, 
+  symbol: symbol, 
   monitoringDuration: duration,
   interval: interval
 };
@@ -42,7 +42,6 @@ let priceData = []; // To store prices with timestamps
 const isDebug = () => {
   return process.env.DEBUG == 'true';
 };
-
 
 // Analyze prices
 const analyzePrices = () => {

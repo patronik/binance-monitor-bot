@@ -48,12 +48,13 @@ npm install node-binance-api
 Create a `.env` file in the project directory and add the following configuration:
 
 ```plaintext
-BINANCE_API_KEY=YOUR_KEY                # Your Binance API key
-BINANCE_API_SECRET=YOUR_SECRET          # Your Binance API secret
-DEBUG=true                              # Enable or disable debug logs
-LOCALE='en-US'                          # Locale used for date and time output
-CONTACT_EMAIL_ADDRESS=homepage.admin@gmail.com # Email address for notifications (if implemented)
-CONTACT_EMAIL_PASSWORD='password'       # Email password for notifications (if implemented)
+BINANCE_API_KEY=YOUR_KEY                      # Your Binance API key
+BINANCE_API_SECRET=YOUR_SECRET                # Your Binance API secret
+DEBUG=true                                    # Enable or disable debug logs
+LOCALE='en-US'                                # Locale used for date and time output
+SENDER_EMAIL_ADDRESS=homepage.admin@gmail.com # Email address of notification sender (SMTP login)
+SENDER_EMAIL_PASSWORD='password'              # Email password of notification sender (SMTP pass)
+RECEIVER_EMAIL_ADDRESS='john.smith@gmail.com' # Email address of notification receiver
 ```
 
 ### 6. Configure main script
@@ -71,8 +72,8 @@ Edit `mailer.js` to include your gmail SMTP credentials:
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-      user: '<YOUR_CONTACT_EMAIL_ADDRESS>', 
-      pass: '<YOUR_CONTACT_EMAIL_PASSWORD'   
+      user: '<YOUR_SENDER_EMAIL_ADDRESS>', 
+      pass: '<YOUR_SENDER_EMAIL_PASSWORD'   
   }
   });
 ```
