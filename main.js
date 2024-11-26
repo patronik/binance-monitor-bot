@@ -156,22 +156,22 @@ const analyzePrices = () => {
   const avgMinPrice = totalMinPrices / intervalCount;
   const avgMaxPrice = totalMaxPrices / intervalCount;
   const avgAvgPrice = totalAvgPrices / intervalCount; 
-  const avgPriceDiff = avgMaxPrice.toFixed(2) - avgMinPrice.toFixed(2);
+  const avgPriceDiff = avgMaxPrice.toFixed(4) - avgMinPrice.toFixed(4);
   const avgVolatility = (avgPriceDiff / avgAvgPrice * 100);
 
   // Log results
   console.log('Price analysis complete. Results:');
   minMaxData.forEach((data) => {
     console.log(
-      `Time Frame: ${data.frameStart} to ${data.frameEnd} | Min Price: $${data.minPrice.toFixed(2)} | Max Price: $${data.maxPrice.toFixed(2)} | Avg Price: $${data.avgPrice.toFixed(2)}`
+      `Time Frame: ${data.frameStart} to ${data.frameEnd} | Min Price: $${data.minPrice.toFixed(4)} | Max Price: $${data.maxPrice.toFixed(4)} | Avg Price: $${data.avgPrice.toFixed(4)}`
     );
   });
 
   console.log('\nOverall Averages:');
-  console.log(`Average Min Price: $${avgMinPrice.toFixed(2)}`);
-  console.log(`Average Max Price: $${avgMaxPrice.toFixed(2)}`);
-  console.log(`Average Avg Price: $${avgAvgPrice.toFixed(2)}`);
-  console.log(`Average Price Diff: $${avgPriceDiff.toFixed(2)}`);
+  console.log(`Average Min Price: $${avgMinPrice.toFixed(4)}`);
+  console.log(`Average Max Price: $${avgMaxPrice.toFixed(4)}`);
+  console.log(`Average Avg Price: $${avgAvgPrice.toFixed(4)}`);
+  console.log(`Average Price Diff: $${avgPriceDiff.toFixed(4)}`);
   console.log(`Average Volatility: ${avgVolatility.toFixed(2)}%`);  
 
   console.log(`\nSkipped Count: ${skippedCount}`);
@@ -213,12 +213,12 @@ const monitorPrices = async () => {
 
     let openingPrice = priceData[0].price;
     let closingPrice = priceData[priceData.length - 1].price;
-    console.log('\nOpening price: %s', openingPrice.toFixed(2));
-    console.log('Closing price: %s', closingPrice.toFixed(2));
+    console.log('\nOpening price: %s', openingPrice.toFixed(4));
+    console.log('Closing price: %s', closingPrice.toFixed(4));
     
     let priceDiff = (closingPrice - openingPrice);
     let priceChange = Math.abs(priceDiff) / openingPrice * 100;
-    console.log('Change: %s%s\%\n', (closingPrice > openingPrice ? '+' : '-'), priceChange.toFixed(2));
+    console.log('Change: %s%s\%\n', (closingPrice > openingPrice ? '+' : '-'), priceChange.toFixed(4));
   
     let {
       avgMinPrice, 
