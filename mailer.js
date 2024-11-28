@@ -51,7 +51,8 @@ Frame Avg MaxPrice: $${avgMaxPrice.toFixed(4)}.
 Frame Avg AvgPrice: $${avgAvgPrice.toFixed(4)}.
 Frame Avg PriceDiff: $${avgPriceDiff.toFixed(4)}.
 -----------------------------------------
-Closing Price: $${closingPrice.toFixed(4)}.`
+Closing Price: $${closingPrice.toFixed(4)}.
+Price${changeSign}.`
         };
         // Send the email
         transporter.sendMail(mailOptions, (error, info) => {
