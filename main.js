@@ -20,8 +20,8 @@ const symbol = symbolArg.split('=')[1];
 const durationArg = args.find((arg) => arg.startsWith('--duration='));
 const intervalArg = args.find((arg) => arg.startsWith('--interval='));
 
-const duration = durationArg ? parseInt(durationArg.split('=')[1], 10) * 60 * 1000 : 15 * 60 * 1000; // Default: 15 minutes
-const interval = intervalArg ? parseInt(intervalArg.split('=')[1], 10) * 60 * 1000 : 5 * 60 * 1000; // Default: 5 minutes
+const duration = durationArg ? parseFloat(durationArg.split('=')[1]) * 60 * 1000 : 15 * 60 * 1000; // Default: 15 minutes
+const interval = intervalArg ? parseFloat(intervalArg.split('=')[1]) * 60 * 1000 : 5 * 60 * 1000; // Default: 5 minutes
 
 // Configuration
 const config = {
