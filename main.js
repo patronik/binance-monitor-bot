@@ -190,6 +190,34 @@ const monitorPrices = async () => {
   const monitoringStartTime = new Date(); // Capture monitoring start time
   console.log(`Monitoring ${config.symbol} prices for ${config.monitoringDuration / 1000 / 60} minutes...`);
   console.log(`Monitoring started at: ${monitoringStartTime.toLocaleTimeString((process.env.LOCALE || 'en-US'))}`);
+  
+  // Notify price change treshold
+  const notifyCngThdArg = args.find((arg) => arg.startsWith('--notifyCngThd='));  
+  let notifyCngThd = false;
+  if (notifyCngThdArg) {
+    notifyCngThd = parseFloat(notifyCngThdArg.split('=')[1]);
+    console.log(`Notify price change treshold: ${notifyCngThd}`);
+  }
+
+  // Notify volume change treshold
+  const notifyVolThdArg = args.find((arg) => arg.startsWith('--notifyVolThd='));  
+  let notifyVolThd = false;
+  if (notifyVolThdArg) {
+    notifyVolThd = parseFloat(notifyVolThdArg.split('=')[1]);
+    console.log(`Notify volume change treshold: ${notifyVolThd}`);
+  }
+
+  // Notify price change up
+  const notifyCngUpArg = args.find((arg) => arg.startsWith('--notifyCngUp='));
+  if (notifyCngUpArg) {
+    console.log(`Notify price change up`);  
+  }
+
+   // Notify price change down
+   const notifyCngDownArg = args.find((arg) => arg.startsWith('--notifyCngDown='));
+   if (notifyCngDownArg) {
+     console.log(`Notify price change down`);  
+   }  
 
   const priceHandler = async () => {
     try {
@@ -230,33 +258,29 @@ const monitorPrices = async () => {
 
     let notifyByEmail = true;
     
-    // Check notification price change treshold 
-    const notifyCngThdArg = args.find((arg) => arg.startsWith('--notifyCngThd='));
-    if (notifyCngThdArg) {
-      let notifyCngThd = parseFloat(notifyCngThdArg.split('=')[1]);
+    // Check notification price change treshold   
+    if (notifyCngThd != false) {    
       if (priceChange < notifyCngThd) {
         notifyByEmail = false;
       }
     }
     
-    // Check notification price volatility treshold 
-    const notifyVolThdArg = args.find((arg) => arg.startsWith('--notifyVolThd='));
-    if (notifyVolThdArg) {
-      let notifyVolThd = parseFloat(notifyVolThd.split('=')[1]);
+    // Check notification price volatility treshold     
+    if (notifyVolThd != false) {      
       if (avgVolatility < notifyVolThd) {
         notifyByEmail = false;
       }
     }
 
     // Check notification price change up flag 
-    if (args.find((arg) => arg.startsWith('--notifyCngUp='))) {
+    if (notifyCngUpArg) {
       if (!(openingPrice < closingPrice)) {
         notifyByEmail = false;
       }
     }
 
     // Check notification price change down flag 
-    if (args.find((arg) => arg.startsWith('--notifyCngDown='))) {
+    if (notifyCngDownArg) {
       if (!(openingPrice > closingPrice)) {
         notifyByEmail = false;
       }
